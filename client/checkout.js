@@ -1,4 +1,5 @@
 async function createOrderCallback() {
+  document.querySelector('.orderRequest pre').innerHTML = prettyPrintObject(editor.get());
   try {
     const response = await fetch("/api/orders", {
       method: "POST",
@@ -8,6 +9,7 @@ async function createOrderCallback() {
       // use the "body" param to optionally pass additional order information
       // like product ids and quantities
       body: JSON.stringify({
+        payload : editor.get(),
         cart: [
           {
             id: "YOUR_PRODUCT_ID",
@@ -20,6 +22,8 @@ async function createOrderCallback() {
     const orderData = await response.json();
 
     if (orderData.id) {
+      document.querySelector('.orderResponse pre').innerHTML = prettyPrintObject(orderData);
+
       return orderData.id;
     } else {
       const errorDetail = orderData?.details?.[0];
@@ -80,62 +84,84 @@ async function onApproveCallback(data, actions) {
       // (3) Successful transaction -> Show confirmation or thank you message
       // Or go to another URL:  actions.redirect('thank_you.html');
       resultMessage(
-        `Transaction ${transaction.status}: ${transaction.id}<br><br>See console for all available details`,
+        `Transaction ${transaction.status}: ${transaction.id}<br><br>See console for all available details`
       );
       console.log(
         "Capture result",
         orderData,
-        JSON.stringify(orderData, null, 2),
+        JSON.stringify(orderData, null, 2)
       );
+      document.querySelector('.captureResponse pre').innerHTML = prettyPrintObject(orderData);
     }
   } catch (error) {
     console.error(error);
     resultMessage(
-      `Sorry, your transaction could not be processed...<br><br>${error}`,
+      `Sorry, your transaction could not be processed...<br><br>${error}`
     );
   }
 }
 
-window.paypal
-  .Buttons({
+
+handleFlow("first_visit", false);
+// Select the JSON to send based on configuration
+const saveCard = document.querySelector('#save')
+saveCard.addEventListener('change', () => {
+  if(saveCard.checked){
+    handleFlow("first_visit", true);
+  }else{
+    handleFlow("first_visit", false);
+    console.log(editor.get())
+  }
+})
+
+
+// handleFlow("first_visit", false);
+
+// handleFlow("returning_customer", false);
+
+// document.getElementById("getJSON").onclick = function () {
+ 
+  const cardField = window.paypal.CardFields({
     createOrder: createOrderCallback,
     onApprove: onApproveCallback,
-  })
-  .render("#paypal-button-container");
 
-const cardField = window.paypal.CardFields({
-  createOrder: createOrderCallback,
-  onApprove: onApproveCallback,
-});
+  });
 
-// Render each field after checking for eligibility
-if (cardField.isEligible()) {
-  const nameField = cardField.NameField();
-  nameField.render("#card-name-field-container");
+  // Render each field after checking for eligibility
+  if (cardField.isEligible()) {
 
-  const numberField = cardField.NumberField();
-  numberField.render("#card-number-field-container");
+    // const savePPCheckox = document.getElementById('savePPCheckox');
+    // const cardFieldSubmitButton = document.getElementById('card-field-submit-button');
+    // savePPCheckox.classList.remove('hidden');
+    // cardFieldSubmitButton.classList.remove('hidden');
 
-  const cvvField = cardField.CVVField();
-  cvvField.render("#card-cvv-field-container");
+    const nameField = cardField.NameField();
+    nameField.render("#card-name-field-container");
 
-  const expiryField = cardField.ExpiryField();
-  expiryField.render("#card-expiry-field-container");
+    const numberField = cardField.NumberField();
+    numberField.render("#card-number-field-container");
 
-  // Add click listener to submit button and call the submit function on the CardField component
-  document
-    .getElementById("multi-card-field-button")
-    .addEventListener("click", () => {
-      cardField.submit().catch((error) => {
-        resultMessage(
-          `Sorry, your transaction could not be processed...<br><br>${error}`,
-        );
+    const cvvField = cardField.CVVField();
+    cvvField.render("#card-cvv-field-container");
+
+    const expiryField = cardField.ExpiryField();
+    expiryField.render("#card-expiry-field-container");
+
+    // Add click listener to submit button and call the submit function on the CardField component
+    document
+      .getElementById("card-field-submit-button")
+      .addEventListener("click", () => {
+        cardField.submit().catch((error) => {
+          resultMessage(
+            `Sorry, your transaction could not be processed...<br><br>${error}`
+          );
+        });
       });
-    });
-} else {
-  // Hides card fields if the merchant isn't eligible
-  document.querySelector("#card-form").style = "display: none";
-}
+  } else {
+    // Hides card fields if the merchant isn't eligible
+    document.querySelector("#card-form").style = "display: none";
+  }
+// };
 
 // Example function to show a result to the user. Your site's UI library can be used instead.
 function resultMessage(message) {

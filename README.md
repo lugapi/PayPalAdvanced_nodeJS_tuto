@@ -1,8 +1,7 @@
 # Advanced Integration Example
 
-This folder contains example code for [version 2](https://developer.paypal.com/docs/checkout/advanced/integrate/) of a PayPal advanced Checkout integration using the JavaScript SDK and Node.js to complete transactions with the PayPal REST API.
-
-Version 2 is the current advanced Checkout integration, and includes hosted card fields.
+This folder contains example of a Credit Card Vaulting via PayPal advanced Checkout integration using the JavaScript SDK and Node.js to complete transactions with the PayPal REST API.
+Here is the documentation [https://developer.paypal.com/docs/checkout/save-payment-methods/during-purchase/orders-api/cards/](https://developer.paypal.com/docs/checkout/save-payment-methods/during-purchase/orders-api/cards/) 
 
 ## Instructions
 

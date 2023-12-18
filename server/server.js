@@ -1,8 +1,9 @@
 import express from "express";
 import fetch from "node-fetch";
+
 import "dotenv/config";
 
-const { PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, PORT = 8885 } = process.env;
+const { PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, PAYPAL_CURRENCY, PORT = 8885 } = process.env;
 const base = "https://api-m.sandbox.paypal.com";
 const app = express();
 
@@ -46,43 +47,24 @@ const generateAccessToken = async () => {
  * Create an order to start the transaction.
  * @see https://developer.paypal.com/docs/api/orders/v2/#orders_create
  */
-const createOrder = async (cart) => {
-  // use the cart information passed from the front-end to calculate the purchase unit details
-  console.log(
-    "shopping cart information passed from the frontend createOrder() callback:",
-    cart,
-  );
+const createOrder = async (content) => {
+  console.log("content", content);
 
   const accessToken = await generateAccessToken();
   const url = `${base}/v2/checkout/orders`;
-  const payload = {
-    intent: "CAPTURE",
-    purchase_units: [
-      {
-        amount: {
-          currency_code: "USD",
-          value: "100.00",
-        },
-      },
-    ],
-  };
 
   const response = await fetch(url, {
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${accessToken}`,
-      // Uncomment one of these to force an error for negative testing (in sandbox mode only). Documentation:
-      // https://developer.paypal.com/tools/sandbox/negative-testing/request-headers/
-      // "PayPal-Mock-Response": '{"mock_application_codes": "MISSING_REQUIRED_PARAMETER"}'
-      // "PayPal-Mock-Response": '{"mock_application_codes": "PERMISSION_DENIED"}'
-      // "PayPal-Mock-Response": '{"mock_application_codes": "INTERNAL_SERVER_ERROR"}'
     },
     method: "POST",
-    body: JSON.stringify(payload),
+    body: JSON.stringify(content),
   });
 
   return handleResponse(response);
 };
+
 
 /**
  * Capture payment for the created order to complete the transaction.
@@ -124,8 +106,9 @@ async function handleResponse(response) {
 app.post("/api/orders", async (req, res) => {
   try {
     // use the cart information passed from the front-end to calculate the order amount detals
-    const { cart } = req.body;
-    const { jsonResponse, httpStatusCode } = await createOrder(cart);
+    const { cart, payload } = req.body;
+    // console.log("payload", payload);
+    const { jsonResponse, httpStatusCode } = await createOrder(payload);
     res.status(httpStatusCode).json(jsonResponse);
   } catch (error) {
     console.error("Failed to create order:", error);
@@ -149,6 +132,7 @@ app.get("/", async (req, res) => {
   try {
     res.render("checkout", {
       clientId: PAYPAL_CLIENT_ID,
+      envCurrency: PAYPAL_CURRENCY,
     });
   } catch (err) {
     res.status(500).send(err.message);
