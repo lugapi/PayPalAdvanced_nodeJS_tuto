@@ -14,109 +14,119 @@
     integrity="sha512-XmjnlPNi5tkrcqMGEG7ZOpGhny9t8fdCk0oxZxjFaqF3cl3UKv+51GgeUoY3Rf/ZaGtBvMZ9dDhceGZ1hcOyMw=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="commonFront.js"></script>  
+  <style>
+    body {
+      background-color: aliceblue;
+    }
+  </style>
+  <script src="commonFront.js"></script>
 </head>
 
 <body>
   <div class="container mx-auto">
-    <x-slot name="help">
-      <div class="flex flex-col m-5 p-4 sm:p-8 bg-white dark:bg-gray-500 shadow sm:rounded-lg">
-        <h1 id="help-title" class="hover:text-blue-600 hover:underline">How to use this page?</h1>
-        <div class="helpContent hidden pt-5">
-          <ol class="list-decimal px-5">
-            <li>Toggle the SCA switch if you want to force SCA or not</li>
-            <li>Fill in the credit card details in the card form on the left side.</li>
-            <li>Click the "Pay Now" button to initiate the payment process.</li>
-            <li>The payment process involves creating an order, handling 3D Secure data, and capturing the payment.</li>
-            <li>Responses for each step are displayed on the right side of the page.</li>
-          </ol>
+    <div class="flex flex-col gap-4">
+      <x-slot name="help">
+        <div class="flex flex-col m-5 p-4 sm:p-8 bg-white dark:bg-gray-500 shadow sm:rounded-lg">
+          <h1 id="help-title" class="hover:text-blue-600 hover:underline">How to use this page?</h1>
+          <div class="helpContent hidden pt-5">
+            <ol class="list-decimal px-5">
+              <li>Toggle the SCA switch if you want to force SCA or not</li>
+              <li>Fill in the credit card details in the card form on the left side.</li>
+              <li>Click the "Pay Now" button to initiate the payment process.</li>
+              <li>The payment process involves creating an order, handling 3D Secure data, and capturing the payment.
+              </li>
+              <li>Responses for each step are displayed on the right side of the page.</li>
+            </ol>
+          </div>
+        </div>
+      </x-slot>
+      <div class="itemOptions flex flex-col m-5 p-4 sm:p-8 bg-white dark:bg-gray-500 shadow sm:rounded-lg">
+        <h1 class="font-semibold text-xl text-gray-800 dark:text-white leading-tight pb-4">Options</h1>
+        <div class="py-3 px-6 mb-0 bg-gray-200 border-b-1 border-gray-300 text-gray-900" id="headingThree">
+          <h5 class="mb-0">
+            <div class="payment-flow">
+              <label for="paymentFlow">Payment Flow</label>
+              <select id="paymentFlow" class="w-full">
+                <option value="first_visit">First visit</option>
+                <option value="returning_customer">Returning Customer</option>
+              </select>
+            </div>
+          </h5>
+          <h5 class="mb-0 mt-2">
+            <div class="existingClient" hidden>
+              <div class="flex flex-col gap-2">
+                <a target="_blank" class="text-blue-600 underline hover:underline"
+                  href="https://developer.paypal.com/docs/checkout/save-payment-methods/during-purchase/js-sdk/cards/">Vault
+                  Credit Card documentation</a>
+              </div>
+              <div class="flex flex-col sm:flex-row lg:flex items-center gap-2">
+                <label for="paymentFlow">Existing Client :</label>
+                <input type="text" class="idClientToSelect" value="cMDUjMNFRC">
+                <!-- Submit button for existing client -->
+                <button id="existingClientSubmit"
+                  class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md">Load existing
+                  card</button>
+              </div>
+            </div>
+          </h5>
+          <!-- Small text to explain the choice -->
+          <a id="intentOrderDoc" hidden target="_blank" class="text-xs text-blue-600 italic"
+            href="https://developer.paypal.com/docs/checkout/save-payment-methods/during-purchase/js-sdk/cards/"
+            class="text-blue-600 underline">Vault save cards documentation</a>
         </div>
       </div>
-    </x-slot>
-    <x-options>
-      <h5 class="mb-0">
-        <div class="payment-flow">
-          <label for="paymentFlow">Payment Flow</label>
-          <select id="paymentFlow" class="w-full">
-            <option value="first_visit">First visit</option>
-            <option value="returning_customer">Returning Customer</option>
-          </select>
-        </div>
-      </h5>
-      <h5 class="mb-0 mt-2">
-        <div class="existingClient" hidden>
-          <div class="flex flex-col gap-2">
-            <a target="_blank" class="text-blue-600 underline hover:underline"
-              href="https://developer.paypal.com/docs/checkout/save-payment-methods/during-purchase/js-sdk/cards/">Vault
-              Credit Card documentation</a>
-          </div>
-          <div class="flex flex-col sm:flex-row lg:flex items-center gap-2">
-            <label for="paymentFlow">Existing Client :</label>
-            <input type="text" class="idClientToSelect" value="cMDUjMNFRC">
-            <!-- Submit button for existing client -->
-            <button id="existingClientSubmit"
-              class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md">Load existing
-              card</button>
-          </div>
-        </div>
-      </h5>
-      <!-- Small text to explain the choice -->
-      <a id="intentOrderDoc" hidden target="_blank" class="text-xs text-blue-600 italic"
-        href="https://developer.paypal.com/docs/checkout/save-payment-methods/during-purchase/js-sdk/cards/"
-        class="text-blue-600 underline">Vault save cards documentation</a>
-    </x-options>
+      <div id="jsoneditor"></div>
 
-    <div id="jsoneditor"></div>
-    <button class="inline-flex items-center px-4 py-2 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest bg-red-600 hover:bg-yellow-400 active:bg-indigo-900 focus:outline-none focus:border-indigo-900 focus:ring focus:ring-indigo-300" id="getJSON">LOAD PAYPAL BUTTON</button>
-
-    <div class="flex flex-col gap-10">
-      <div class="flex flex-wrap px-2">
-        <div class="flex flex-col lg:w-1/2 w-full pb-5">
-          <div id="payment-cards" class="flex flex-col items-center gap-4 flex-wrap -mx-2 mb-4"></div>
-          <div id="paypal-button-container" class="paypal-button-container"></div>
-          <div id="checkout-form" class="card_container">
-            <div id="card-name-field-container"></div>
-            <div id="card-number-field-container"></div>
-            <div id="card-expiry-field-container"></div>
-            <div id="card-cvv-field-container"></div>
-            <div id="savePPCheckox" class="my-4">
-              <input type="checkbox" id="save" name="save">
-              <label for="save">Save my card for future purchase</label>
+      <div class="flex flex-col gap-10">
+        <div class="flex lg:flex-row flex-col px-2 gap-4">
+          <div class="flex flex-col lg:w-1/2 w-full pb-5">
+            <div id="payment-cards" class="flex flex-col items-center gap-4 flex-wrap -mx-2 mb-4"></div>
+            <!-- <div id="paypal-button-container" class="paypal-button-container"></div> -->
+            <div id="checkout-form" class="card_container">
+              <div id="card-name-field-container"></div>
+              <div id="card-number-field-container"></div>
+              <div id="card-expiry-field-container"></div>
+              <div id="card-cvv-field-container"></div>
+              <div id="savePPCheckox" class="my-4">
+                <input type="checkbox" id="save" name="save">
+                <label for="save">Save my card for future purchase</label>
+              </div>
+              <button id="card-field-submit-button" type="button"
+                class="my-2 w-full rounded-md bg-blue-500 py-1.5 font-medium text-blue-50 hover:bg-blue-600">Pay now
+                with
+                Card Fields</button>
             </div>
-            <button id="card-field-submit-button" type="button"
-              class="my-2 w-full rounded-md bg-blue-500 py-1.5 font-medium text-blue-50 hover:bg-blue-600">Pay now with
-              Card Fields</button>
           </div>
-        </div>
-        <div id="responses" class="flex flex-col lg:w-1/2 w-full">
-          <div class="row orderRequest">
-            <h2>Create Order Request</h2>
-            <pre></pre>
+          <div id="responses" class="flex flex-col lg:w-1/2 w-full gap-4 pt-4">
+            <div class="orderRequest w-full bg-white rounded-lg p-5 overflow-auto border-2">
+              <h2>Create Order Request</h2>
+              <pre></pre>
+            </div>
+            <div class="orderResponse w-full bg-white rounded-lg p-5 overflow-auto border-2">
+              <h2>Create Order Response</h2>
+              <pre></pre>
+            </div>
+            <div class="hidden threeDSResponse w-full bg-white rounded-lg p-5 overflow-auto border-2">
+              <h2>3D Secure data</h2>
+              <pre></pre>
+            </div>
+            <!-- button to fetch getOrder -->
+            <button id="getOrderButton"
+              class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full hidden" type="button">Get
+              Order</button>
+            <div class="getOrderResponse hidden">
+              <h2>Get Order response data</h2>
+              <pre></pre>
+            </div>
+            <button id="captureOrderButton"
+              class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full hidden"
+              type="button">Capture Order</button>
+            <div class="captureResponse w-full bg-white rounded-lg p-5 overflow-auto border-2">
+              <h2>Capture response data</h2>
+              <pre></pre>
+            </div>
+            <div id="result-message"></div>
           </div>
-          <div class="row orderResponse">
-            <h2>Create Order Response</h2>
-            <pre></pre>
-          </div>
-          <div class="row threeDSResponse">
-            <h2>3D Secure data</h2>
-            <pre></pre>
-          </div>
-          <!-- button to fetch getOrder -->
-          <button id="getOrderButton"
-            class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full hidden" type="button">Get
-            Order</button>
-          <div class="row getOrderResponse hidden">
-            <h2>Get Order response data</h2>
-            <pre></pre>
-          </div>
-          <button id="captureOrderButton"
-            class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full hidden"
-            type="button">Capture Order</button>
-          <div class="row captureResponse">
-            <h2>Capture response data</h2>
-            <pre></pre>
-          </div>
-          <div id="result-message"></div>
         </div>
       </div>
     </div>

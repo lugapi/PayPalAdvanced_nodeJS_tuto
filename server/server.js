@@ -47,19 +47,19 @@ const generateAccessToken = async () => {
  * Create an order to start the transaction.
  * @see https://developer.paypal.com/docs/api/orders/v2/#orders_create
  */
-const createOrder = async (content) => {
-  console.log("content", content);
+const getVaultFromCustomer = async (customerID) => {
 
   const accessToken = await generateAccessToken();
-  const url = `${base}/v2/checkout/orders`;
+  const url = `${base}/v3/vault/payment-tokens?customer_id=` + customerID;
+
+  console.log('url', url)
 
   const response = await fetch(url, {
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${accessToken}`,
     },
-    method: "POST",
-    body: JSON.stringify(content),
+    method: "GET",
   });
 
   return handleResponse(response);
@@ -90,6 +90,25 @@ const captureOrder = async (orderID) => {
   return handleResponse(response);
 };
 
+
+const createOrder = async (content) => {
+  console.log("content", content);
+
+  const accessToken = await generateAccessToken();
+  const url = `${base}/v2/checkout/orders`;
+
+  const response = await fetch(url, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    method: "POST",
+    body: JSON.stringify(content),
+  });
+
+  return handleResponse(response);
+};
+
 async function handleResponse(response) {
   try {
     const jsonResponse = await response.json();
@@ -102,6 +121,19 @@ async function handleResponse(response) {
     throw new Error(errorMessage);
   }
 }
+
+app.post("/api/getPaymentTokens", async (req, res) => {
+  try {
+    // use the cart information passed from the front-end to calculate the order amount detals
+    const { customerID } = req.body;
+    console.log("customerID", customerID);
+    const { jsonResponse, httpStatusCode } = await getVaultFromCustomer(customerID);
+    res.status(httpStatusCode).json(jsonResponse);
+  } catch (error) {
+    console.error("Failed getPaymentTokens:", error);
+    res.status(500).json({ error: "Failed to getPaymentTokens." });
+  }
+});
 
 app.post("/api/orders", async (req, res) => {
   try {
