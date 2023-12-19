@@ -114,6 +114,11 @@ const captureOrder = async (orderID) => {
   return handleResponse(response);
 };
 
+// Get current timestamp
+const getTimestamp = () => {
+  return new Date().toISOString();
+};
+
 
 const createOrder = async (content) => {
   console.log("content", content);
@@ -125,6 +130,7 @@ const createOrder = async (content) => {
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${accessToken}`,
+      "PayPal-Request-Id": getTimestamp(),
     },
     method: "POST",
     body: JSON.stringify(content),

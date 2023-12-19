@@ -80,13 +80,13 @@ function handleFlow(flow, saveCard, customerID, existingCard, cardId) {
     if (saveCard) {
       const modifiedJson = { ...jsonVaultFirstVisit }; // Copy the original JSON
 
-      // Ensure nested properties are initialized
-      modifiedJson.payment_source = modifiedJson.payment_source || {};
-      modifiedJson.payment_source.card = modifiedJson.payment_source.card || {};
-      modifiedJson.payment_source.card.attributes = modifiedJson.payment_source.card.attributes || {};
-      modifiedJson.payment_source.card.attributes.customer = modifiedJson.payment_source.card.attributes.customer || {};
-
-      if (customerID) {
+      if (customerID !== null) {
+        // Ensure nested properties are initialized
+        modifiedJson.payment_source = modifiedJson.payment_source || {};
+        modifiedJson.payment_source.card = modifiedJson.payment_source.card || {};
+        modifiedJson.payment_source.card.attributes = modifiedJson.payment_source.card.attributes || {};
+        modifiedJson.payment_source.card.attributes.customer = modifiedJson.payment_source.card.attributes.customer || {};
+        
         modifiedJson.payment_source.card.attributes.customer.id = customerID;
       }
       setJSONData(modifiedJson);
@@ -115,8 +115,8 @@ function handleFlow(flow, saveCard, customerID, existingCard, cardId) {
               payment_type: "UNSCHEDULED",
               usage: "SUBSEQUENT"
             },
-            cancel_url: route("requestDetails"),
-            return_url: route("requestDetails")
+            cancel_url: "https://integration.lugapi.fr/display-request-details",
+            return_url: "https://integration.lugapi.fr/display-request-details"
           }
         };
         setJSONData(jsonClickOnSavedCard);
