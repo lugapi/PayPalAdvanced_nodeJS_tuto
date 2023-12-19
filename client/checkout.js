@@ -11,6 +11,7 @@ const paymentFlow = document.querySelector('#paymentFlow');
 const existingClient = document.querySelector('.existingClient');
 const cardContainer = document.querySelector('.card_container');
 const paymentCards = document.querySelector('#payment-cards');
+const idCustomer = document.querySelector('.idClientToSelect');
 
 paymentFlow.onchange = function() {
   existingClient.hidden = true;
@@ -33,6 +34,9 @@ paymentFlow.onchange = function() {
 saveCard.addEventListener('change', () => {
   if(saveCard.checked){
     handleFlow("first_visit", true);
+    if(paymentFlow.value === "returning_customer"){
+      handleFlow("returning_customer", true, idCustomer.value);
+    }
   }else{
     handleFlow("first_visit", false);
     console.log(editor.get())
@@ -40,9 +44,9 @@ saveCard.addEventListener('change', () => {
 })
 
 
-
-
-
+if (paymentFlow.value === "returning_customer" && saveCard.checked) {
+  handleFlow("returning_customer", true);
+}
 
 
 
@@ -262,7 +266,7 @@ document.querySelector('#existingClientSubmit').onclick = function() {
                   }
 
                   const cardSection = document.createElement('div');
-                  cardSection.classList.add('flex', 'flex-col-reverse', 'gap-2');
+                  cardSection.classList.add('flex', 'flex-col-reverse', 'gap-2', 'items-center');
 
                   const actionButton = document.createElement('div');
                   actionButton.classList.add('flex', 'justify-evenly', 'gap-2');
@@ -288,7 +292,7 @@ document.querySelector('#existingClientSubmit').onclick = function() {
                   // Gérez l'événement "click" du bouton "Supprimer"
                   deleteButton.addEventListener('click', function() {
 
-                      fetch('/api/deletePaymentToken', {
+                      fetch('/api/deleteVaultFromCustomer', {
                               method: 'post',
                               headers: {
                                   'Content-Type': 'application/json',
@@ -299,16 +303,16 @@ document.querySelector('#existingClientSubmit').onclick = function() {
                           })
                           .then((res) => {
                               if (res.ok) {
-                                  console.log('La carte a été supprimée avec succès.');
+                                  console.log('Card deleted !');
                                   cardElement.remove();
                                   selectButton.remove();
                                   deleteButton.remove();
                               } else {
-                                  console.error('La suppression de la carte a échoué.');
+                                  console.error('Card deletion failed !');
                               }
                           })
                           .catch((error) => {
-                              console.error('Une erreur s\'est produite lors de la suppression de la carte :', error);
+                              console.error('Error occurred while deleting card :', error);
                           });
                   });
 

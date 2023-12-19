@@ -69,6 +69,7 @@ const jsonVaultFirstVisit = {
 
 // Function to handle different flows
 function handleFlow(flow, saveCard, customerID, existingCard, cardId) {
+  console.log("handleFlow", flow, saveCard, customerID, existingCard, cardId);
   if (flow === "first_visit") {
     if (saveCard) {
       setJSONData(jsonVaultFirstVisit);
@@ -78,6 +79,13 @@ function handleFlow(flow, saveCard, customerID, existingCard, cardId) {
   } else if (flow === "returning_customer") {
     if (saveCard) {
       const modifiedJson = { ...jsonVaultFirstVisit }; // Copy the original JSON
+
+      // Ensure nested properties are initialized
+      modifiedJson.payment_source = modifiedJson.payment_source || {};
+      modifiedJson.payment_source.card = modifiedJson.payment_source.card || {};
+      modifiedJson.payment_source.card.attributes = modifiedJson.payment_source.card.attributes || {};
+      modifiedJson.payment_source.card.attributes.customer = modifiedJson.payment_source.card.attributes.customer || {};
+
       if (customerID) {
         modifiedJson.payment_source.card.attributes.customer.id = customerID;
       }

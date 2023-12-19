@@ -52,8 +52,6 @@ const getVaultFromCustomer = async (customerID) => {
   const accessToken = await generateAccessToken();
   const url = `${base}/v3/vault/payment-tokens?customer_id=` + customerID;
 
-  console.log('url', url)
-
   const response = await fetch(url, {
     headers: {
       "Content-Type": "application/json",
@@ -63,6 +61,32 @@ const getVaultFromCustomer = async (customerID) => {
   });
 
   return handleResponse(response);
+};
+
+const deleteVaultFromCustomer = async (cardId) => {
+  const accessToken = await generateAccessToken();
+  const url = `${base}/v3/vault/payment-tokens/` + cardId;
+
+  console.log('url', url);
+
+  const response = await fetch(url, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    method: "DELETE",
+  });
+
+  try {
+    const jsonResponse = await response.text();
+    return {
+      jsonResponse,
+      httpStatusCode: response.status,
+    };
+  } catch (err) {
+    console.error("Error processing response:", err);
+    throw new Error("Failed to process response.");
+  }
 };
 
 
@@ -134,6 +158,20 @@ app.post("/api/getPaymentTokens", async (req, res) => {
     res.status(500).json({ error: "Failed to getPaymentTokens." });
   }
 });
+
+app.post("/api/deleteVaultFromCustomer", async (req, res) => {
+  try {
+    // use the cart information passed from the front-end to calculate the order amount detals
+    const { cardId } = req.body;
+    console.log("cardId", cardId);
+    const { jsonResponse, httpStatusCode } = await deleteVaultFromCustomer(cardId);
+    res.status(httpStatusCode).send(jsonResponse);  // Utilisez send() à la place de text()
+  } catch (error) {
+    console.error("Failed delete Vault:", error);
+    res.status(500).json({ error: "Failed delete Vault." });
+  }
+});
+
 
 app.post("/api/orders", async (req, res) => {
   try {
