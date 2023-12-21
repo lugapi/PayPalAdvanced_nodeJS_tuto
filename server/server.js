@@ -139,6 +139,22 @@ const createOrder = async (content) => {
   return handleResponse(response);
 };
 
+const getOrder = async (orderID) => {
+  const accessToken = await generateAccessToken();
+  const url = `${base}/v2/checkout/orders/${orderID}`;
+
+  const response = await fetch(url, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+      // "PayPal-Request-Id": getTimestamp(),
+    },
+    method: "GET",
+  });
+
+  return handleResponse(response);
+}
+
 async function handleResponse(response) {
   try {
     const jsonResponse = await response.json();
@@ -162,6 +178,32 @@ app.post("/api/getPaymentTokens", async (req, res) => {
   } catch (error) {
     console.error("Failed getPaymentTokens:", error);
     res.status(500).json({ error: "Failed to getPaymentTokens." });
+  }
+});
+
+app.post("/api/getOrder", async (req, res) => {
+  try {
+    // use the cart information passed from the front-end to calculate the order amount detals
+    const { orderID } = req.body;
+    console.log("orderID", orderID);
+    const { jsonResponse, httpStatusCode } = await getOrder(orderID);
+    res.status(httpStatusCode).json(jsonResponse);
+  } catch (error) {
+    console.error("Failed getOrder:", error);
+    res.status(500).json({ error: "Failed to getOrder." });
+  }
+});
+
+app.post("/api/captureOrder", async (req, res) => {
+  try {
+    // use the cart information passed from the front-end to calculate the order amount detals
+    const { orderID } = req.body;
+    console.log("orderID", orderID);
+    const { jsonResponse, httpStatusCode } = await captureOrder(orderID);
+    res.status(httpStatusCode).json(jsonResponse);
+  } catch (error) {
+    console.error("Failed captureOrder:", error);
+    res.status(500).json({ error: "Failed to captureOrder." });
   }
 });
 

@@ -44,9 +44,8 @@ if (paymentFlow.value === "returning_customer" && saveCard.checked) {
 }
 
 async function createOrderCallback(cardId = null) {
-  document.querySelector(".orderRequest pre").innerHTML = prettyPrintObject(
-    editor.get()
-  );
+  showResponse(document.querySelector('.orderRequest'),  editor.get());
+
   try {
     const response = await fetch("/api/orders", {
       method: "POST",
@@ -68,9 +67,53 @@ async function createOrderCallback(cardId = null) {
 
     const orderData = await response.json();
 
+    // check if orderData.links[1] & orderData.links[1].rel exists & is a "payer-action"
+    if (
+      orderData.links[1] &&
+      orderData.links[1].rel === "payer-action"
+    ) {
+      // get the url from orderData.links[1].href
+      var url = orderData.links[1].href;
+
+      // open the url in a new window
+      var modal = window.open(url, "ModalWindowName", "width=600,height=400");
+
+      if (modal) {
+        // Modal window opened
+        document.getElementById("getOrderButton").classList.remove("hidden");
+        document.getElementById("getOrderButton").onclick = function () {
+          fetch('/api/getOrder', {
+            method: "post",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              orderID: orderData.id,
+            }),
+          })
+            .then((res) => res.json())
+            .then((orderData) => {
+              console.log("getOrderData", orderData);
+              showResponse(document.querySelector('.getOrderResponse'),  orderData);
+              document
+                .getElementById("captureOrderButton")
+                .classList.remove("hidden");
+            });
+        };
+      } else {
+        // Modal window blocked
+        alert(
+          "Please allow popups for this website in order to complete the payment"
+        );
+      }
+
+      document.getElementById("captureOrderButton").onclick = function () {
+        captureOrderAfter3DS(orderData.id);
+      };
+    }
+
     if (orderData.id) {
-      document.querySelector(".orderResponse pre").innerHTML =
-        prettyPrintObject(orderData);
+      showResponse(document.querySelector('.orderResponse'),  orderData);
 
       return orderData.id;
     } else {
@@ -139,8 +182,7 @@ async function onApproveCallback(data, actions) {
         orderData,
         JSON.stringify(orderData, null, 2)
       );
-      document.querySelector(".captureResponse pre").innerHTML =
-        prettyPrintObject(orderData);
+      showResponse(document.querySelector('.captureResponse'),  orderData);
     }
   } catch (error) {
     console.error(error);
@@ -157,11 +199,6 @@ const cardField = window.paypal.CardFields({
 
 // Render each field after checking for eligibility
 if (cardField.isEligible()) {
-  // const savePPCheckox = document.getElementById('savePPCheckox');
-  // const cardFieldSubmitButton = document.getElementById('card-field-submit-button');
-  // savePPCheckox.classList.remove('hidden');
-  // cardFieldSubmitButton.classList.remove('hidden');
-
   const nameField = cardField.NameField();
   nameField.render("#card-name-field-container");
 
@@ -430,6 +467,42 @@ async function createOrderExistingCard(cardId) {
     resultMessage(`Could not initiate PayPal Checkout...<br><br>${error}`);
   }
 }
+
+async function captureOrderAfter3DS(orderID) {
+  const res = await fetch('api/captureOrder', {
+    method: "post",
+    body: JSON.stringify({
+      orderID: orderID,
+    }),
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  const orderData = await res.json();
+  showResponse(document.querySelector('.captureResponse'), orderData);
+}
+
+function addButton(container, text, onClick) {
+  const button = document.createElement("button");
+  button.textContent = text;
+  button.classList.add(
+    "bg-blue-600",
+    "hover:bg-blue-800",
+    "text-white",
+    "font-bold",
+    "py-2",
+    "px-4",
+    "rounded-full"
+  );
+  button.onclick = onClick;
+  container.appendChild(button);
+}
+
+function showResponse(container, data) {
+  container.querySelector("pre").innerHTML = prettyPrintObject(data);
+  container.classList.remove("hidden");
+}
+
 
 document.querySelector("#help-title").onclick = function () {
   document.querySelector(".helpContent").classList.toggle("hidden");
