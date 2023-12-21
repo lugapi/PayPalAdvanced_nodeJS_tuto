@@ -1,3 +1,4 @@
+// jsonEditor.js
 // create the editor
 const container = document.getElementById("jsoneditor");
 const options = {
@@ -66,70 +67,3 @@ const jsonVaultFirstVisit = {
     }
   }
 };
-
-// Function to handle different flows
-function handleFlow(flow, saveCard, customerID, existingCard, cardId) {
-  console.log("handleFlow", flow, saveCard, customerID, existingCard, cardId);
-  if (flow === "first_visit") {
-    if (saveCard) {
-      setJSONData(jsonVaultFirstVisit);
-    } else {
-      setJSONData(json);
-    }
-  } else if (flow === "returning_customer") {
-    if (saveCard) {
-      const modifiedJson = { ...jsonVaultFirstVisit }; // Copy the original JSON
-
-      if (customerID !== null) {
-        // Ensure nested properties are initialized
-        modifiedJson.payment_source = modifiedJson.payment_source || {};
-        modifiedJson.payment_source.card = modifiedJson.payment_source.card || {};
-        modifiedJson.payment_source.card.attributes = modifiedJson.payment_source.card.attributes || {};
-        modifiedJson.payment_source.card.attributes.customer = modifiedJson.payment_source.card.attributes.customer || {};
-        
-        modifiedJson.payment_source.card.attributes.customer.id = customerID;
-      }
-      setJSONData(modifiedJson);
-    } else {
-      if (existingCard) {
-        // JSON for clicking on a saved card
-        const jsonClickOnSavedCard = {
-          intent: "CAPTURE",
-          purchase_units: [
-            {
-              reference_id: "d9f80740-38f0-11e8-b467-0ed5f89f718b",
-              amount: {
-                currency_code: "USD",
-                value: "100.00"
-              }
-            }
-          ],
-          payment_source: {
-            card: {
-              vault_id: cardId
-            }
-          },
-          application_context: {
-            stored_payment_source: {
-              payment_initiator: "CUSTOMER",
-              payment_type: "UNSCHEDULED",
-              usage: "SUBSEQUENT"
-            },
-            cancel_url: "https://integration.lugapi.fr/display-request-details",
-            return_url: "https://integration.lugapi.fr/display-request-details"
-          }
-        };
-        setJSONData(jsonClickOnSavedCard);
-      } else {
-        // JSON for returning customer without saving a new card
-        setJSONData(json);
-      }
-    }
-  } else {
-    // Handle other flows as needed
-  }
-}
-
-// Example of using the function with some values
-// handleFlow("first_visit", true);
-// handleFlow("returning_customer", false);
