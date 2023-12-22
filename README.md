@@ -37,6 +37,8 @@ In order to test 3D Secure scenarios, please refer to Braintree 3DS documentatio
 
 - First time visit
 ![First time visit](./screenshots/firstTimeScenario.png)
+
 <br />
+
 - Returning flow
 ![Returning Flow](./screenshots/returningFlow.png)
