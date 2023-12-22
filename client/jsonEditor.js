@@ -21,19 +21,24 @@ const json = {
     {
       amount: {
         currency_code: currency,
-        value: "100.00"
-      }
-    }
+        value: "100.00",
+      },
+    },
   ],
   payment_source: {
     card: {
       stored_credential: {
         payment_initiator: "CUSTOMER",
         payment_type: "ONE_TIME",
-        usage: "FIRST"
-      }
-    }
-  }
+        usage: "FIRST",
+      },
+      // attributes: {
+      //   verification: {
+      //     method: "SCA_ALWAYS",
+      //   },
+      // },
+    },
+  },
 };
 
 // Your JSON for first visit with saveCard
@@ -44,9 +49,9 @@ const jsonVaultFirstVisit = {
       reference_id: "d9f80740-38f0-11e8-b467-0ed5f89f718b",
       amount: {
         currency_code: currency,
-        value: "100.00"
-      }
-    }
+        value: "100.00",
+      },
+    },
   ],
   payment_source: {
     card: {
@@ -57,13 +62,13 @@ const jsonVaultFirstVisit = {
         admin_area_2: "Anytown",
         admin_area_1: "CA",
         postal_code: "12345",
-        country_code: "US"
+        country_code: "US",
       },
       attributes: {
         vault: {
-          store_in_vault: "ON_SUCCESS"
-        }
-      }
-    }
-  }
+          store_in_vault: "ON_SUCCESS",
+        },
+      },
+    },
+  },
 };
